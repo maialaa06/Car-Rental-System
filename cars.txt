@@ -1,0 +1,5 @@
+1|0|Toyota|Corolla|White|45230.5|0|0;
+2|0|Hyundai|Elantra|Black|31890|0|0;
+3|0|Kia|Sportage|Red|27440.8|0|0;
+4|1|f|f|f|67868|4356|1;
+5|1|f|f|u|678|9999|0;
