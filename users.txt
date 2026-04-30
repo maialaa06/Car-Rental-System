@@ -1,1 +1,2 @@
-1|mai|mai@gmail.com|mai0000;
+1|mai|mai@gmail.com|0000;
+2|marez|marez@gmail.com|123;

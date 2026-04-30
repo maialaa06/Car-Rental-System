@@ -4,7 +4,7 @@
 using namespace std;
 int const  Nusers = 3000;
 int nextUser = 1;
-int loggedUserId;
+int loggedInUserId;
 
 struct User
 {
@@ -61,14 +61,14 @@ bool IsUserExist(string username, string password) {
     
     for (auto i : users)
         if (username == i.Uname && password == i.Password) {
-            loggedUserId = i.Id;
+            loggedInUserId = i.Id;
             seen = true;
             break;
         }
     return seen;
 }
 
-void Login () {
+void SignIn () {
     system("cls");
     string username, password;
 
@@ -92,7 +92,7 @@ void Login () {
     }    
 }
 
-User ParseUser (string userRow) {
+User ReadUser (string userRow) {
     User parsedUser;
     string userId;
     stringstream userStream(userRow);
@@ -106,29 +106,22 @@ User ParseUser (string userRow) {
     return parsedUser;
 }
 
-void SavingUserDataInStruct (User u) {
-    int index = u.Id - 1;
-    users[index].Id = u.Id;
-    users[index].Uname = u.Uname;
-    users[index].Email = u.Email;
-    users[index].Password = u.Password;
-}
-
-void SavingUserDataFromFileToArray () {
-    ifstream file ("users.txt");
-
-    string s;
-    while (getline(file, s)) {
-        User u = ParseUser(s);
-        SavingUserDataInStruct(u);
-    }
-    file.close();
-}
-
 void UpdateNextUser () {
     for (int i = 0; i < Nusers; i++)
         if (users[i].Id == 0) {
             nextUser = i + 1;
             break;
         }
+}
+
+void LoadUsersDataFromFile () {
+    ifstream file ("users.txt");
+    
+    string s;
+    while (getline(file, s)) {
+        User u = ReadUser(s);
+        users[u.Id - 1] = u;
+    }
+    file.close();
+    UpdateNextUser();
 }
