@@ -9,33 +9,35 @@ void RestoreAppState () {
     LoadCarsDataFromFile();
 }
 
-int main () {
-    //RestoreAppState();
-
+void WelcomeScreen() {
+    system("cls");
     cout << "==================================\n";
     cout << "   WELCOME TO CAR RENTAL SYSTEM   \n";
     cout << "==================================\n\n\n";
 
-    char order;
+    string order;
     cout << "1 - Sign Up\n";
     cout << "2 - Sign In\n";
-    cin >> order;
-    if (order == '1') {
-        SignUp();
-        LoadUsersDataFromFile();
-        SignIn();
-    }    
-    else if (order == '2')
-        SignIn();
+    cout << "Enter your choice: ";        
 
-    
-        
-    char pressedkey;
+    while(true) {
+        getline(cin, order);
+        if (order == "1") {
+            SignUp();
+            LoadUsersDataFromFile();
+            SignIn();
+            break;
+        }
+        else if (order == "2") {
+            SignIn();
+            break;
+        }
+        cout << "Enter a Valid  Choice\n";
+    }
+
     ListCars();
-
+    char pressedkey;
     while (true){
-        
-        //cout << car[3].ownerId << '\n';
         pressedkey = _getch();
         //cout << "pre: " << pressedkey << '\n'; 
         switch(pressedkey) {
@@ -72,14 +74,30 @@ int main () {
             case 53:
                 ReturnCar(cars, nextCar, highlitedCarId);
                 break;
+            // 6 check available
+            case 54:
+                check_out_car(cars, nextCar, highlitedCarId);
+                break;
+            // 7 list available cars
+            case 55:
+                list_available_cars(cars, nextCar);
+                break;
+            // 8 to logout
+            case 56:
+                WelcomeScreen();
             // 0 to exit
             case '0':
-                return 0;
-
+                return;
         }
     }
-    system("pause");
+}
 
+int main () {
+    RestoreAppState();
+    WelcomeScreen();
+
+
+    system("pause");
     return 0;
 }
 

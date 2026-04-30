@@ -58,6 +58,14 @@ void AddUserToFile (Customer c) {
     file << c.toString();
     file.close();
 }
+
+bool isUsernameAvailable(string username) {
+    for(int i = 0; i < userCount; i++) {
+        if(users[i].username == username)
+            return false;
+    }
+    return true;
+}
         
 void SignUp() {
     system("cls");
@@ -73,9 +81,14 @@ void SignUp() {
     cout << "             SIGN UP              \n";
     cout << "==================================\n"; 
 
+    
     cout << "Enter username: ";
-    cin.ignore();                    // Clear the input buffer before reading the username
-    getline(cin, newUser.username);       // Use getline to allow spaces in the username
+    while(true) {
+        cin >> newUser.username;
+        if(isUsernameAvailable(newUser.username)) 
+            break;
+        cout << "this username is not available.\nEnter username: ";
+    }
     
     string email;
     cout << "Enter Your Email: ";
@@ -121,13 +134,12 @@ void SignIn () {
 
     while(true) {
         string username, password;
-        cout << "Enter username: ";
-        cin.ignore();                   // Clear the input buffer before reading the username
+        cout << "Enter username: ";                        // Clear the input buffer before reading the username
         getline(cin, username);              // Use getline to allow spaces in the username
         cout << "Enter password: ";
         getline(cin, password);              // Use getline to allow spaces in the password
+
         for (int i = 0; i < userCount; i++) {
-            cout << users[i].username << '\n' << users[i].password << '\n';
             if (users[i].username == username && users[i].password == password) {
                 cout << "Login successful! Welcome, " << users[i].username << "!" << endl;
                 loggedInUserId = users[i].id;
@@ -135,13 +147,13 @@ void SignIn () {
             }
         }
         cout << "Invalid username or password. Please try again." << endl;
-    }    
+    } 
 }
 
 void UpdateUserCount () {
     for (int i = 0; i < MAX_USERS; i++)
         if (users[i].id == 0) {
-            userCount = i + 1;
+            userCount = i;
             break;
         }
 }

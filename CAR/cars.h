@@ -76,21 +76,18 @@ void AddCar() {
         c.OwnerId = loggedInUserId;
         c.IsDeleted = false;
         c.IsAvailable = true;
+
         cout << "Enter Car Brand: ";
-        cin.ignore();
         getline(cin, c.Brand);
 
         cout << "\nEnter Car Model: ";
-        // cin.ignore();
         getline(cin, c.Model);
 
         cout << "\nEnter Car Color: ";
-        // cin.ignore();
         getline(cin, c.Color);
 
         c.Distance_Traveled = readInt("\nEnter Distance Traveled By Car: "); 
         c.Price = readInt("\nEnter Car Price: ");
-
 
         AddCarToFile(c);
         nextCar++;
@@ -157,6 +154,9 @@ void ListCars() {
     cout << "3- Update car\n";
     cout << "4- Rent Car\n";
     cout << "5- Return Car\n";
+    cout << "6- Check Car Availability\n";
+    cout << "7- List Available Cars\n";
+    cout << "8- Logout\n";
     cout << "0- Exit\n";
     cout << "Enter your choice...\n\n\n"; 
 
@@ -171,8 +171,7 @@ void ListCars() {
         if(i.Id == highlitedCarId)
             DisplayCarInfoSummaryHighlighted(i);
         else
-            DisplayCarInfoSummary(i);
-    
+            DisplayCarInfoSummary(i);    
     }
 }
 
@@ -305,7 +304,7 @@ void UpdateNextCar () {
 }
 
 void LoadCarsDataFromFile () {
-     ifstream file ("cars.txt", ios::ate);
+     ifstream file ("cars.txt");
      if (file.peek() == EOF)
         return;
 
@@ -354,43 +353,43 @@ bool ProcessPayment()
 
 void RentCar(Car cars[] , int size , int id) {
     system("cls");
-    bool occupied = false, isPaymentSuccessfull = false, isNotAvailable = false;
+    bool occupied = false, isPaymentSuccessfull = false, isNotAvailable = false, isOwnCar = false;
     for (int i = 0 ; i < size ; i++) {
         if (cars[i].Id == id ) {
             occupied = true ;
-        if(loggedInUserId == cars[i].OwnerId) {
-            cout << "You Can`t Rent Your Own Car\n";
-            break;
-        }
-        if (cars[i].IsAvailable) {
-            isPaymentSuccessfull = ProcessPayment();
-            if(isPaymentSuccessfull) {
-                cars[i].IsAvailable = false;
-                cars[i].RenterId = loggedInUserId;
+            if(loggedInUserId == cars[i].OwnerId) {
+                isOwnCar = true;
+                break;
+            }
+
+            if (cars[i].IsAvailable) {
+                isPaymentSuccessfull = ProcessPayment();
+                if(isPaymentSuccessfull) {
+                    cars[i].IsAvailable = false;
+                    cars[i].RenterId = loggedInUserId;
+                }
+            }
+            else {
+                isNotAvailable = true;
             }
         }
-        else {
-            isNotAvailable = true;
-        }
     }
-    
-}
-if (!occupied) {
-    cout << "Car not found." << endl;
-}
 
-ListCars();
+    if (!occupied)
+        cout << "Car not found.\n";
 
-if(isPaymentSuccessfull) {
-    
-    UpdateDataInFile();
-    cout << "\n\n\nPAYMENT SUCCESSFUL\n";
-    cout << "Car rented successfully!\n";
-}
-else if(isNotAvailable) {
-    cout << "\n\nSorry, this car is not available.\n";
-}
+    ListCars();
 
+    if(isPaymentSuccessfull) {
+        
+        UpdateDataInFile();
+        cout << "\n\n\nPAYMENT SUCCESSFUL\n";
+        cout << "Car rented successfully!\n";
+    }
+    else if(isNotAvailable)
+        cout << "\n\nSorry, this car is not available.\n";
+    else if(isOwnCar)
+        cout << "\n\nYou Can`t Rent Your Own Car\n";
 }
 
 void ReturnCar(Car cars[], int size, int id) {
@@ -418,15 +417,65 @@ void ReturnCar(Car cars[], int size, int id) {
 
         }
     }
-
+    
     if (!found) {
         cout << "Car not found" ;
     }
 }
 
 
+void list_available_cars(Car cars[], int currentavailable) {
+    system("cls");
+    cout << "==================================\n";
+    cout << "        AVAILABLE CARS ARE        \n";
+    cout << "==================================\n";
+    
+    bool  carfound = false;
+	for (int i = 0;i < currentavailable; i++)
+	{
+        if(cars[i].IsDeleted)
+            continue;
+
+        if (cars[i].IsAvailable)
+		{
+            cout << "Brand : " << cars[i].Brand << " | Model : " << cars[i].Model <<" | Price : " << cars[i].Price << '\n';           
+			carfound = true;
+		}
+	}
+	if (!carfound)
+	{
+		cout << "No cars available at the moment.\n";
+	}
+}
 
 
+void check_out_car(Car cars[], int currentavailable, int targetid)
+{
+	bool carfound = false, isRented = false;
+	for (int i = 0; i < currentavailable;i++)
+	{
 
+		if (cars[i].Id == targetid) {
+            carfound = true;
+            
+            if (cars[i].IsAvailable)
+                isRented = false;            
+            else 
+                isRented = true;
+            break;
+        }
+	}
+
+    ListCars();
+
+    if(isRented)
+        cout << "the car is currently rented.\n";
+    else
+        cout << "the car is currently available.\n";
+
+	if (!carfound) {
+		cout << "This Car Not Found In Record.\n: ";
+	}
+}
 
 #endif
