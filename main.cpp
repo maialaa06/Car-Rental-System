@@ -10,7 +10,7 @@ void RestoreAppState () {
 }
 
 int main () {
-    RestoreAppState();
+    //RestoreAppState();
 
     cout << "==================================\n";
     cout << "   WELCOME TO CAR RENTAL SYSTEM   \n";
@@ -21,7 +21,7 @@ int main () {
     cout << "2 - Sign In\n";
     cin >> order;
     if (order == '1') {
-        Registeration();
+        SignUp();
         LoadUsersDataFromFile();
         SignIn();
     }    
@@ -82,6 +82,5 @@ int main () {
 
     return 0;
 }
-
 
 

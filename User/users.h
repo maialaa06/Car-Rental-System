@@ -1,21 +1,50 @@
 #include <bits/stdc++.h>
 #include <fstream>
 #define dbg(x) cout << #x << "=" << x << endl;
-using namespace std;
-int const  Nusers = 3000;
-int nextUser = 1;
+
+#define MAX_USERS 300
+int userCount = 0;
 int loggedInUserId;
 
-struct User
-{
-    int Id;
-    string Uname;
-    string Email;
-    string Password;
-};
-User users[Nusers];
+using namespace std;
 
-bool ValidateEmail (string email) {
+struct Address 
+{
+    string bldgNo;
+    string street;
+    string city;
+    
+    string toString() {
+        return bldgNo + "," + street + "," + city; 
+    }
+};
+        
+struct Customer 
+{
+    int id;
+    string nationalId;
+    string username;
+    string email;
+    string password;     // Added password field for authentication
+    string phoneNo;
+    string job;
+    Address addrress;
+
+    string toString() {
+        return to_string(id) + "|" + 
+        nationalId + "|" +
+        username + "|" +
+        email + "|" +
+        password + "|" +
+        phoneNo + "|" +
+        job + "|" +
+        addrress.toString() + ";\n";
+    }
+};
+
+Customer users[MAX_USERS];
+        
+bool isEmailValid (string email) {
     bool isvalid = true;
 
     regex pattern("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$");
@@ -24,104 +53,129 @@ bool ValidateEmail (string email) {
         return isvalid;
 }
 
-void Registeration () {
-    User u;
-    u.Id = nextUser;
+void AddUserToFile (Customer c) {
+    ofstream file("users.txt", ios::app);
+    file << c.toString();
+    file.close();
+}
+        
+void SignUp() {
+    system("cls");
+    if (userCount >= MAX_USERS) {
+        cout << "Users limit reached. Cannot sign up more users." << endl;
+        return;
+    }
+
+    Customer newUser;
+    newUser.id = userCount + 1;
 
     cout << "==================================\n";
-    cout << "             REGISTER             \n";
-    cout << "==================================\n";   
-    
-    cout << "Enter Your Username\n";
-    cin >>  u.Uname;
-    cout << "Enter Your Email\n";
-    cin >> u.Email;
-    
-    bool isvalid = ValidateEmail(u.Email);
-    while (!isvalid) {
-        cout << "invalid email\n"; 
-        cout << "Try Again\n";
-        cin >> u.Email;
-        isvalid = ValidateEmail(u.Email);
-    }    
-    
-    cout <<"Enter Your Password\n";
-    cin >> u.Password;
-    
-    ofstream file("users.txt", ios::app);
-    file << u.Id << '|' << u.Uname << '|' << u.Email << '|'; 
-    file << u.Password << ';' << '\n'; 
-    file.close();
+    cout << "             SIGN UP              \n";
+    cout << "==================================\n"; 
 
-    nextUser++;
+    cout << "Enter username: ";
+    cin.ignore();                    // Clear the input buffer before reading the username
+    getline(cin, newUser.username);       // Use getline to allow spaces in the username
+    
+    string email;
+    cout << "Enter Your Email: ";
+    cin >> email;
+    while(!isEmailValid(email)) {
+        cout << "Enter a Valid Email\n";
+        cin >> email;
+    }
+    newUser.email = email;
+
+    cout << "Enter phone number: ";
+    cin >> newUser.phoneNo;
+    
+    cout << "Enter your national Id: ";
+    cin >> newUser.nationalId;
+    
+    cout << "Enter password: ";
+    cin.ignore();
+    getline(cin, newUser.password);  
+  
+    cout << "Enter city: ";
+    getline(cin, newUser.addrress.city);
+    cout << "Enter street: ";
+    getline(cin, newUser.addrress.street);  
+    cout << "Enter building number: ";
+    cin >> newUser.addrress.bldgNo;
+
+    cout << "Enter job: ";
+    cin.ignore();                  
+    getline(cin, newUser.job); 
+   
+    AddUserToFile(newUser);      // Add the new user to the array
+    userCount++;       // Increment user count after adding the new user to the array
 }
-
-bool IsUserExist(string username, string password) {
-    bool seen = false;
-    
-    for (auto i : users)
-        if (username == i.Uname && password == i.Password) {
-            loggedInUserId = i.Id;
-            seen = true;
-            break;
-        }
-    return seen;
-}
-
+      
 void SignIn () {
     system("cls");
     string username, password;
-
-    cout << "==================================\n";
-    cout << "             SIGN IN              \n";
-    cout << "==================================\n"; 
     
-    cout << "Enter Your Username\n";
-    cin >> username;
-    cout << "Enter Your Password\n";
-    cin >> password;
+    cout << "==================================\n";
+    cout << "             Sign In              \n";
+    cout << "==================================\n"; 
 
-    bool seen = IsUserExist(username, password);
-    while (!seen) {
-        cout << "Username Or Password Is Wrong Try Again\n";
-        cout << "Enter Your Username\n";
-        cin >> username;
-        cout << "Enter Your Password\n";    
-        cin >> password;
-        seen = IsUserExist(username, password);
+    while(true) {
+        string username, password;
+        cout << "Enter username: ";
+        cin.ignore();                   // Clear the input buffer before reading the username
+        getline(cin, username);              // Use getline to allow spaces in the username
+        cout << "Enter password: ";
+        getline(cin, password);              // Use getline to allow spaces in the password
+        for (int i = 0; i < userCount; i++) {
+            cout << users[i].username << '\n' << users[i].password << '\n';
+            if (users[i].username == username && users[i].password == password) {
+                cout << "Login successful! Welcome, " << users[i].username << "!" << endl;
+                loggedInUserId = users[i].id;
+                return;
+            }
+        }
+        cout << "Invalid username or password. Please try again." << endl;
     }    
 }
 
-User ReadUser (string userRow) {
-    User parsedUser;
+void UpdateUserCount () {
+    for (int i = 0; i < MAX_USERS; i++)
+        if (users[i].id == 0) {
+            userCount = i + 1;
+            break;
+        }
+}
+
+Customer ReadUser (string userRow) {
+    Customer c;
     string userId;
     stringstream userStream(userRow);
 
     getline(userStream, userId, '|');
-    parsedUser.Id = stoi(userId);
-    getline(userStream, parsedUser.Uname, '|');
-    getline(userStream, parsedUser.Email, '|');
-    getline(userStream, parsedUser.Password, ';');
+    c.id = stoi(userId);
+    getline(userStream, c.nationalId, '|');
+    getline(userStream, c.username, '|');
+    getline(userStream, c.email, '|');
+    getline(userStream, c.password, '|');
+    getline(userStream, c.phoneNo, '|');
+    getline(userStream, c.job, '|');
+    getline(userStream, c.addrress.bldgNo, ',');
+    getline(userStream, c.addrress.street, ',');
+    getline(userStream, c.addrress.city, ';');
 
-    return parsedUser;
-}
-
-void UpdateNextUser () {
-    for (int i = 0; i < Nusers; i++)
-        if (users[i].Id == 0) {
-            nextUser = i + 1;
-            break;
-        }
+    return c;
 }
 
 void LoadUsersDataFromFile () {
-    ifstream file ("users.txt");
-    
-    string s;
-    while (getline(file, s)) {
-        User u = ReadUser(s);
-        users[u.Id - 1] = u;
-    }
+  ifstream file ("users.txt");
+  if (file.peek() == EOF)
+     return;
+
+  string s;
+  while (getline(file, s)) {
+       Customer u = ReadUser(s);
+       users[u.id - 1] = u;
+   }
     file.close();
-    UpdateNextUser();
+   UpdateUserCount();
 }

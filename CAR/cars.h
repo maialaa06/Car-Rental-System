@@ -305,7 +305,10 @@ void UpdateNextCar () {
 }
 
 void LoadCarsDataFromFile () {
-    ifstream file("cars.txt");
+     ifstream file ("cars.txt", ios::ate);
+     if (file.peek() == EOF)
+        return;
+
     string s;
     while (getline(file, s)) {
         Car c = ReadCar(s);
